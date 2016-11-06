@@ -8,6 +8,10 @@ This module contains the :class:`Game` class.
 from itertools import chain
 from itertools import groupby
 
+try:
+    input = raw_input
+except NameError:
+    pass
 
 EMPTY = '.'
 YELLOW = 'X'
