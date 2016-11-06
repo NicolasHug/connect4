@@ -1,11 +1,10 @@
 Welcome to Connect4's documentation!
-=========================================
-
-Contents:
+====================================
 
 .. toctree::
    :maxdepth: 2
 
+   connect4
 
 
 Indices and tables

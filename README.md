@@ -12,16 +12,18 @@ A basic connect4 game
 Installation / Usage
 --------------------
 
-To install use pip:
-
-    $ pip install connect4
-
-
-Or clone the repo:
-
     $ git clone https://github.com/Niourf/connect4.git
     $ python setup.py install
-    
+
+or for development mode:
+
+    $ pip install -e .
+
+
+To run a game session:
+
+    $ python -m connect4
+
 Contributing
 ------------
 
