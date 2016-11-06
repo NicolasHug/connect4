@@ -2,7 +2,7 @@
 This module contains the :class:`Game` class.
 """
 
-# Note: some implementation ideas were inspired by Patrick Westerhoff:
+# Note: some (great) implementation ideas were inspired by Patrick Westerhoff:
 # https://gist.github.com/poke/6934842
 
 from itertools import chain
@@ -74,10 +74,14 @@ class Game:
         def diagonals():
             """Generator function to iterate over all the diagonals."""
 
+            start = self.to_win - 1
+            end = self.n_rows + self.n_cols - self.to_win
             pos_diag_indices = (((r - c, c) for c in range(self.n_cols))
-                                for r in range(self.n_rows + self.n_cols - 1))
+                                for r in range(start, end))
+            start = self.to_win - self.n_cols
+            end = self.n_rows - self.to_win + 1
             neg_diag_indices = (((r + c, c) for c in range(self.n_cols))
-                                for r in range(1 - self.n_cols, self.n_rows))
+                                for r in range(start, end))
 
             for d in chain(pos_diag_indices, neg_diag_indices):
                 yield (self.board[i][j] for (i, j) in d
@@ -121,6 +125,7 @@ class Game:
                           'Red' if current_player == RED else 'Yellow')
                     col = int(input(msg)) - 1
                     assert 0 <= col < self.n_cols
+                    assert self.board[0][col] == EMPTY
                     input_ok = True
                 except (ValueError, AssertionError):
                     print('Invalid choice.')

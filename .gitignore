@@ -41,3 +41,5 @@ output/
 
 # vim
 *.swp
+
+.cache
