@@ -5,6 +5,8 @@ This module contains the :class:`Board` and the :class:`Game` class.
 # Note: some (great) implementation ideas were inspired by Patrick Westerhoff:
 # https://gist.github.com/poke/6934842
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 from itertools import chain
 from itertools import groupby
 
@@ -78,6 +80,39 @@ class Board:
 
         return all(not self.col_is_free(col) for col in range(self.n_cols))
 
+    def all_sequences(self, to_win=1):
+
+        def diagonals():
+            """Generator function to iterate over all the diagonals."""
+
+            start = to_win - 1
+            end = self.n_rows + self.n_cols - to_win
+            pos_diag_indices = (((r - c, c) for c in range(self.n_cols))
+                                for r in range(start, end))
+            start = to_win - self.n_cols
+            end = self.n_rows - to_win + 1
+            neg_diag_indices = (((r + c, c) for c in range(self.n_cols))
+                                for r in range(start, end))
+
+            for d in chain(pos_diag_indices, neg_diag_indices):
+                yield [self.grid[i][j] for (i, j) in d
+                       if 0 <= i < self.n_rows and
+                       0 <= j < self.n_cols]
+
+        rows = self.grid
+        columns = zip(*self.grid)
+
+        return chain(rows, columns, diagonals())
+
+
+    def __str__(self):
+
+        s = ' '.join('{0:2s}'.format(str(i + 1))
+                     for i in range(self.n_cols)) + '\n'
+        s += '\n'.join('  '.join(cell for cell in row)
+                       for row in self.grid)
+        return s
+
 
 class Game:
     """A basic implementation of the connect4 game.
@@ -116,29 +151,9 @@ class Game:
             player has won yet, ``None`` is returned.
         """
 
-        def diagonals():
-            """Generator function to iterate over all the diagonals."""
-
-            start = self.to_win - 1
-            end = self.board.n_rows + self.board.n_cols - self.to_win
-            pos_diag_indices = (((r - c, c) for c in range(self.board.n_cols))
-                                for r in range(start, end))
-            start = self.to_win - self.board.n_cols
-            end = self.board.n_rows - self.to_win + 1
-            neg_diag_indices = (((r + c, c) for c in range(self.board.n_cols))
-                                for r in range(start, end))
-
-            for d in chain(pos_diag_indices, neg_diag_indices):
-                yield (self.board.grid[i][j] for (i, j) in d
-                       if 0 <= i < self.board.n_rows and
-                       0 <= j < self.board.n_cols)
-
-        rows = self.board.grid
-        columns = zip(*self.board.grid)
-
         # for every line, column and diag, check if there are 'to_win' pieces
         # of the same color that are aligned. Is so, return the color.
-        for sequence in chain(rows, columns, diagonals()):
+        for sequence in self.board.all_sequences():
             for coin, group in groupby(sequence):
                 if (coin != self.board.EMPTY and
                    len(list(group)) >= self.to_win):
@@ -159,7 +174,7 @@ class Game:
 
         while winner is None and not self.board.is_full():
             print()
-            print(self)
+            print(self.board)
             col = current_player.play(self.board)
             print('Player {0} plays in column {1}.'.format(
                   current_player, col + 1))
@@ -168,18 +183,10 @@ class Game:
             current_player = (self.player1 if current_player == self.player2
                               else self.player2)
 
-        print(self)
+        print(self.board)
         if winner is not None:
             print('Player {0} won the game!'.format(winner))
         else:
             print("There's no winner. You're both LOSERS.")
 
         return winner
-
-    def __str__(self):
-
-        s = ' '.join('{0:2s}'.format(str(i + 1))
-                     for i in range(self.board.n_cols)) + '\n'
-        s += '\n'.join('  '.join(cell for cell in row)
-                       for row in self.board.grid)
-        return s
