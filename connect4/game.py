@@ -45,6 +45,8 @@ class Board:
             col(int): The column.
             coin(str): The coin to insert.
 
+        Returns:
+            row(int): The row where the coin was inserted.
         Raises:
             ValueError: if ``col`` is full or is out of range.
         """
@@ -59,8 +61,10 @@ class Board:
         except StopIteration:
             raise ValueError('Column ' + str(col) + ' is already full.')
 
-    def col_is_free(self, col):
-        """Check if one can insert a coin in given column.
+        return r
+
+    def is_free(self, col):
+        """Check if a coin can be inserted in given column.
 
         Args:
             col(int): The column
@@ -71,6 +75,14 @@ class Board:
 
         return self.grid[0][col] == self.EMPTY
 
+    def free_columns(self):
+        """Generator function to iterate over all free columns
+
+        Returns:
+            All free columns."""
+
+        return (col for col in range(self.n_cols) if self.is_free(col))
+
     def is_full(self):
         """Check if the board is full.
 
@@ -78,12 +90,27 @@ class Board:
             ``True`` if the board is full, else ``False``.
         """
 
-        return all(not self.col_is_free(col) for col in range(self.n_cols))
+        return all(not self.is_free(col) for col in range(self.n_cols))
 
     def all_sequences(self, to_win=1):
+        """Generator function to iterate over all sequences of the board.
+
+        A sequence is either a row, a column or a diagonal.
+
+        Args:
+            to_win(int, optional): The number of successive coins needed to win
+                a game. Only diagonals with a length greater or equal to
+                ``to_win`` will be yielded.
+
+        Returns:
+            All sequences.
+        """
 
         def diagonals():
             """Generator function to iterate over all the diagonals."""
+
+            # Note : we actually yield a list and not just a generator so that
+            # diagonals can be iterated multiple times.
 
             start = to_win - 1
             end = self.n_rows + self.n_cols - to_win
@@ -104,7 +131,6 @@ class Board:
 
         return chain(rows, columns, diagonals())
 
-
     def __str__(self):
 
         s = ' '.join('{0:2s}'.format(str(i + 1))
@@ -115,7 +141,7 @@ class Board:
 
 
 class Game:
-    """A basic implementation of the connect4 game.
+    """A basic engine for the connect4 game.
 
     Args:
         players(tuple of :class:`Player <connect4.player.Player>`): The two
@@ -137,8 +163,12 @@ class Game:
     def __init__(self, players, n_rows=6, n_cols=7, to_win=4):
 
         self.board = Board(n_rows, n_cols)
-        self.to_win = to_win
+
         self.player1, self.player2 = players
+        self.player1.opponent = self.player2
+        self.player2.opponent = self.player1
+
+        self.to_win = self.player1.to_win = self.player2.to_win = to_win
 
         if self.player1.coin == self.player2.coin:
             raise ValueError('Both players have the same coin.')
@@ -151,8 +181,8 @@ class Game:
             player has won yet, ``None`` is returned.
         """
 
-        # for every line, column and diag, check if there are 'to_win' pieces
-        # of the same color that are aligned. Is so, return the color.
+        # for every line, column and diag, check if there are at least 'to_win'
+        # pieces of the same color that are aligned.
         for sequence in self.board.all_sequences():
             for coin, group in groupby(sequence):
                 if (coin != self.board.EMPTY and
@@ -173,7 +203,6 @@ class Game:
         current_player = self.player1
 
         while winner is None and not self.board.is_full():
-            print()
             print(self.board)
             col = current_player.play(self.board)
             print('Player {0} plays in column {1}.'.format(
@@ -182,6 +211,7 @@ class Game:
             winner = self.check_winner()
             current_player = (self.player1 if current_player == self.player2
                               else self.player2)
+            print()
 
         print(self.board)
         if winner is not None:

@@ -1,5 +1,5 @@
 """
-This module tests the game class.
+This module tests the game class and the board class.
 """
 
 import pytest
