@@ -2,23 +2,53 @@
 This module runs a game.
 """
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+import argparse
+
 from .game import Game
 from .player import Human
 from .player import Player
 from .player import Minimax
 
-n_rows = 6
-n_cols = 7
-to_win = 4
 
-#player1 = Minimax('X', depth=5)
-player1 = Human('X')
-player2 = Minimax('O', depth=5)
-"""
+def main():
 
-player2 = Player('O')
-#player2 = Player('O')
-"""
+    parser = argparse.ArgumentParser(
+             description='Run a Connect4 game between two players',
+             epilog='Example: python -m connect4 -player1 human ' +
+                    '-player2 human')
 
-g = Game((player1, player2), n_rows=n_rows, n_cols=n_cols, to_win=to_win)
-g.run()
+    players_choices = {'human': Human,
+                       'minimax': Minimax,
+                       'random': Player,
+                       }
+
+    parser.add_argument('-player1', type=str,
+                        default='human',
+                        choices=players_choices,
+                        help='The first player. ' +
+                        'Allowed values are ' +
+                        ', '.join(players_choices.keys()) +
+                        '. (default: human)'
+                        )
+
+    parser.add_argument('-player2', type=str,
+                        default='minimax',
+                        choices=players_choices,
+                        help='The second player. ' +
+                        'Allowed values are ' +
+                        ', '.join(players_choices.keys()) +
+                        '. (default: minimax)'
+                        )
+
+    args = parser.parse_args()
+
+    player1 = players_choices[args.player1]
+    player2 = players_choices[args.player2]
+
+    g = Game((player1('X'), player2('O')))
+    g.run()
+
+if __name__ == "__main__":
+    main()

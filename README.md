@@ -19,17 +19,10 @@ or for development mode:
 
     $ pip install -e .
 
-
-To run a game session:
-
+Usage
+------
     $ python -m connect4
 
-Contributing
-------------
+For help
 
-TBD
-
-Example
--------
-
-TBD
+    $ python -m connect4 -h

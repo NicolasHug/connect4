@@ -6,6 +6,7 @@ from connect4 import Player
 from connect4 import Minimax
 from connect4 import Game
 
+
 def test_Player():
 
     player1 = Player('X')
