@@ -6,7 +6,6 @@ python:
 before_install:
   - pip install coveralls
   - pip install coverage>=4.2
-  - pip install pytest>=3.0.3
 
 # command to install dependencies
 install:
@@ -15,7 +14,7 @@ install:
 
 # command to run tests
 script:
-  - pytest
+  - python -m pytest
 
 # safelist
 branches:
